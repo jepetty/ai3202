@@ -36,7 +36,8 @@ for line in lines:
 fo.close()
 epsilon = float(sys.argv[2])
 
-def createPathMatrix(world, e):
+# Function to create a matrix with nodes corresponding to world
+def CreateNodeMatrix(world):
 	worldRowsCount = len(world)
 	worldColumnsCount = len(world[0])
 	nodeMatrix = world
@@ -51,7 +52,8 @@ def createPathMatrix(world, e):
 				node.reward = -1
 			elif (int(world[i][j]) == 2):
 				# Wall square
-				node.reward = -5
+				node.reward = -100000
+				node.utility = -100000
 				node.action = None
 			elif (int(world[i][j]) == 3):
 				# Snake square
@@ -62,8 +64,41 @@ def createPathMatrix(world, e):
 			elif (int(world[i][j]) == 50):
 				# Goal square
 				node.reward = 50
+				node.utility = 50
 			nodeMatrix[i][j] = node
+	return nodeMatrix
+
+def UpdateUtilityScores(nodes, e):
+	delta = 1000000
+	err = e/9
+	nodesRowsCount = len(nodes)
+	nodesColumnsCount = len(nodes[0])
+	while (delta > err):
+		for i in range(0, nodesRowsCount):
+			for j in range(0, nodesColumnsCount):
+				if ((i + 1) <= nodesRowsCount):
+					# go up
+					upNode = nodes[i+1][j]
+					upReward = upNode.reward
+				else:
+					upReward = 0
+				if ((i - 1) >= 0):
+					downNode = nodes[i-1][j]
+					downReward = downNode.reward
+				else:
+					downReward = 0
+				if ((j + 1) <= nodesColumnsCount):
+					rightNode = nodes[i][j+1]
+					rightReward = rightNode.reward
+				else:
+					rightReward = 0
+				if ((j - 1) >= 0):
+					leftNode = nodes[i][j-1]
+					leftReward = leftNode.reward
+				else:
+					leftReward = 0
 	
-createPathMatrix(worldMatrix, epsilon)
-			
+nodeMatrix = createPathMatrix(worldMatrix)
+updateUtilityScores(nodeMatrix, epsilon)
+
 
