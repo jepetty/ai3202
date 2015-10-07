@@ -24,6 +24,7 @@ class Node:
 		self.reward = 0
 		self.utility = 0
 		self.action = None
+		self.square = None
 
 
 ## Read in command line arguments and assign to appropriate variables
@@ -50,55 +51,99 @@ def CreateNodeMatrix(world):
 			if (int(world[i][j]) == 1):
 				# Mountain square
 				node.reward = -1
+				node.utility = -1
+				node.square = "Mountain"
 			elif (int(world[i][j]) == 2):
 				# Wall square
-				node.reward = -100000
-				node.utility = -100000
+				node.reward = 0
+				node.utility = 0
 				node.action = None
+				node.square = "Mountain"
 			elif (int(world[i][j]) == 3):
 				# Snake square
 				node.reward = -2
+				node.utility = -2
+				node.square = "Snake"
 			elif (int(world[i][j]) == 4):
 				# Barn square
 				node.reward = 1
+				node.utility = 1
+				node.square = "Barn"
 			elif (int(world[i][j]) == 50):
 				# Goal square
 				node.reward = 50
 				node.utility = 50
+				node.square = "Apple"
+			else:
+				node.square = "Normal"
 			nodeMatrix[i][j] = node
 	return nodeMatrix
 
 def UpdateUtilityScores(nodes, e):
-	delta = 1000000
+	delta = 100
 	err = e/9
 	nodesRowsCount = len(nodes)
 	nodesColumnsCount = len(nodes[0])
 	while (delta > err):
+		delta = 0
 		for i in range(0, nodesRowsCount):
 			for j in range(0, nodesColumnsCount):
-				if ((i + 1) <= nodesRowsCount):
-					# go up
-					upNode = nodes[i+1][j]
-					upReward = upNode.reward
-				else:
-					upReward = 0
-				if ((i - 1) >= 0):
-					downNode = nodes[i-1][j]
-					downReward = downNode.reward
+				node = nodes[i][j]
+				# Calculate reward for each direction, taking into account if outside matrix bounds
+				if node.square == "Wall":
+					continue
+				if ((i + 1) < nodesRowsCount):
+					downNode = nodes[i+1][j]
+					downReward = downNode.utility
 				else:
 					downReward = 0
-				if ((j + 1) <= nodesColumnsCount):
+				if ((i - 1) >= 0):
+					upNode = nodes[i-1][j]
+					upReward = upNode.utility
+				else:
+					upReward = 0
+				if ((j + 1) < nodesColumnsCount):
 					rightNode = nodes[i][j+1]
-					rightReward = rightNode.reward
+					rightReward = rightNode.utility
 				else:
 					rightReward = 0
 				if ((j - 1) >= 0):
 					leftNode = nodes[i][j-1]
-					leftReward = leftNode.reward
+					leftReward = leftNode.utility
 				else:
 					leftReward = 0
+				# Calculate possible reward for moving in each direction
+				moveUp = 0.8 * upReward + 0.1 * leftReward + 0.1 * rightReward
+				moveDown = 0.8 * downReward + 0.1 * leftReward + 0.1 * rightReward
+				moveLeft = 0.8 * leftReward + 0.1 * upReward + 0.1 * downReward
+				moveRight = 0.8 * rightReward + 0.1 * upReward + 0.1 * downReward
+				# Calculate which direction is the optimal direction to try and move
+				if (moveUp >= moveDown) and (moveUp >= moveLeft) and (moveUp >= moveRight):
+					oldUtility = node.utility
+					node.action = "Up"
+					node.utility = node.reward + 0.9 * moveUp
+				elif (moveDown >= moveUp) and (moveDown >= moveLeft) and (moveDown >= moveRight):
+					oldUtility = node.utility
+					node.action = "Down"
+					node.utility = node.reward + 0.9 * moveDown
+				elif (moveLeft >= moveUp) and (moveLeft >= moveDown) and (moveLeft >= moveRight):
+					oldUtility = node.utility
+					node.action = "Left"
+					node.utility = node.reward + 0.9 * moveLeft
+				else:
+					oldUtility = node.utility
+					(nodes[i][j]).action = "Right"
+					(nodes[i][j]).utility = node.reward + 0.9 * moveRight
+				#nodes[i][j] = node
+				# Update delta if a new smallest error is found
+				if (delta < abs(node.utility - oldUtility)):
+					delta = abs(node.utility - oldUtility)
+	return nodes
 	
-nodeMatrix = createPathMatrix(worldMatrix)
-updateUtilityScores(nodeMatrix, epsilon)
+def PrintPath(nodeMatrix):
+	print("Jess")
+	
+nodeMatrix = CreateNodeMatrix(worldMatrix)
+updatedMatrix = UpdateUtilityScores(nodeMatrix, epsilon)
 
 
