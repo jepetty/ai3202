@@ -58,7 +58,7 @@ def CreateNodeMatrix(world):
 				node.reward = 0
 				node.utility = 0
 				node.action = None
-				node.square = "Mountain"
+				node.square = "Wall"
 			elif (int(world[i][j]) == 3):
 				# Snake square
 				node.reward = -2
@@ -92,26 +92,26 @@ def UpdateUtilityScores(nodes, e):
 				# Calculate reward for each direction, taking into account if outside matrix bounds
 				if node.square == "Wall":
 					continue
+				upReward = 0
+				downReward = 0
+				leftReward = 0
+				rightReward = 0
 				if ((i + 1) < nodesRowsCount):
-					downNode = nodes[i+1][j]
-					downReward = downNode.utility
-				else:
-					downReward = 0
+					if (nodes[i+1][j]).square != "Wall":
+						downNode = nodes[i+1][j]
+						downReward = downNode.utility
 				if ((i - 1) >= 0):
-					upNode = nodes[i-1][j]
-					upReward = upNode.utility
-				else:
-					upReward = 0
+					if (nodes[i-1][j]).square != "Wall":
+						upNode = nodes[i-1][j]
+						upReward = upNode.utility
 				if ((j + 1) < nodesColumnsCount):
-					rightNode = nodes[i][j+1]
-					rightReward = rightNode.utility
-				else:
-					rightReward = 0
+					if (nodes[i][j+1]).square != "Wall":
+						rightNode = nodes[i][j+1]
+						rightReward = rightNode.utility
 				if ((j - 1) >= 0):
-					leftNode = nodes[i][j-1]
-					leftReward = leftNode.utility
-				else:
-					leftReward = 0
+					if (nodes[i][j-1]).square != "Wall":
+						leftNode = nodes[i][j-1]
+						leftReward = leftNode.utility
 				# Calculate possible reward for moving in each direction
 				moveUp = 0.8 * upReward + 0.1 * leftReward + 0.1 * rightReward
 				moveDown = 0.8 * downReward + 0.1 * leftReward + 0.1 * rightReward
@@ -140,10 +140,25 @@ def UpdateUtilityScores(nodes, e):
 					delta = abs(node.utility - oldUtility)
 	return nodes
 	
-def PrintPath(nodeMatrix):
-	print("Jess")
+def PrintPath(nodes):
+	nodesRowsCount = len(nodes)
+	nodesColumnsCount = len(nodes)
+	node = nodes[nodesRowsCount - 1][0]
+	while (node.reward != 50):
+		print("Location: (", node.xlocation, ", ", node.ylocation, "), Utility: ", node.utility)
+		if node.action == "Up":
+			node = nodes[node.xlocation - 1][node.ylocation]
+		elif node.action == "Down":
+			node = nodes[node.xlocation + 1][node.ylocation]
+		elif node.action == "Left":
+			node = nodes[node.xlocation][node.ylocation - 1]
+		else:
+			node = nodes[node.xlocation][node.ylocation + 1]
+	print("Location: (", node.xlocation, ", ", node.ylocation, "), Utility: ", node.utility)
+			
 	
 nodeMatrix = CreateNodeMatrix(worldMatrix)
 updatedMatrix = UpdateUtilityScores(nodeMatrix, epsilon)
+PrintPath(updatedMatrix)
 
 
