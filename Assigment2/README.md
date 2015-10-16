@@ -1,10 +1,10 @@
 Repository for Assignment 2 for CSCI 3202 - Artificial Intelligence. This assignment focuses on implementing AStarSearch and using and creating heuristics.
 
-Heuristic 1: Manhattan distance
+Heuristic 1:
 The Manhattan distance is found by adding the change in x-distance between two points and the change in y-distance between those points. ie:
 distMan = |x2-x1| + |y2-y1|
 
-Heuristic 2: Euclidean distance
+Heuristic 2:
 The Euclidean distance is found by finding the straightline distance between your point and the destination using Pythagorean's Theorem. ie:
 distEuc = sqrt((x2-x1)^2 + (y2-y1)^2)
 
