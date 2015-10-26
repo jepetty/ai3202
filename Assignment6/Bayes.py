@@ -15,6 +15,45 @@ class Node:
 		self.parents = None
 		self.children = None
 
+# Function to create the Bayes network with appropriate nodes
+def createNetwork():
+	pollutionNode = Node()
+	smokerNode = Node()
+	cancerNode = Node()
+	xrayNode = Node()
+	dyspnoeaNode = Node()
+	
+	pollutionNode.name = "pollution"
+	smokerNode.name = "smoker"
+	cancerNode.name = "cancer"
+	xrayNode.name = "xray"
+	dyspnoeaNode.name = "dyspnoea"
+	
+	pollutionNode.children.append(cancerNode)
+	smokerNode.children.append(cancerNode)
+	cancerNode.children.append(xrayNode)
+	cancerNode.children.append(dyspnoeaNode)
+	
+	cancerNode.parents.append(smokerNode)
+	cancerNode.parents.append(pollutionNode)
+	xrayNode.parents.append(cancerNode)
+	dyspnoeaNode.parents.append(cancerNode)
+	
+	pollutionNode.marginal = 0.9
+	smokerNode.marginal = 0.3
+	
+	cancerNode.conditionals["C|~PS"] = 0.05
+	cancerNode.conditionals["C|~P~S"] = 0.02
+	cancerNode.conditionals["C|PS"] = 0.03
+	cancerNode.conditionals["C|P~S"] = 0.001
+	xrayNode.conditionals["X|C"] = 0.9
+	xrayNode.conditionals["X|~C"] = 0.2
+	dyspnoeaNode.conditionals["D|C"] = 0.65
+	dyspnoeaNode.conditionals["D|~C"] = 0.3
+	
+	nodeNetwork = [smokerNode, pollutionNode, cancerNode, xrayNode, dyspnoeaNode]
+	return nodeNetwork
+	
 # Function to parse the argument from option list
 def parseArgument(arg):
 	# Parse the argument 
