@@ -12,8 +12,8 @@ class Node:
 		self.marginal = 0
 		self.conditionals = {}
 		self.name = ""
-		self.parents = None
-		self.children = None
+		self.parents = []
+		self.children = []
 
 # Function to create the Bayes network with appropriate nodes
 def createNetwork():
@@ -51,16 +51,22 @@ def createNetwork():
 	dyspnoeaNode.conditionals["D|C"] = 0.65
 	dyspnoeaNode.conditionals["D|~C"] = 0.3
 	
-	nodeNetwork = [smokerNode, pollutionNode, cancerNode, xrayNode, dyspnoeaNode]
+	nodeNetwork = {"smoker": smokerNode, "pollution": pollutionNode, "cancer": cancerNode, "xray": xrayNode, "dyspnoea": dyspnoeaNode}
 	return nodeNetwork
 	
-# Function to parse the argument from option list
-def parseArgument(arg):
-	# Parse the argument 
-	print(arg)
+def setPrior(network, arg, value):
+	if arg == "p" or arg == "P":
+		node = network["pollution"]
+		node.marginal = value
+	elif arg == "s" or arg == "S":
+		node = network["smoker"]
+		node.marginal = value
+	else:
+		print("Cannot set the prior for this variable")
 	
 # Main function to receive arguments, begin processing them
 def main():
+    bayesNetwork = createNetwork()
     try:
         opts, args = getopt.getopt(sys.argv[1:], "m:g:j:p:")
     except getopt.GetoptError as err:
@@ -73,8 +79,7 @@ def main():
             print("args: ", a)
             print(a[0])
             print(float(a[1:]))
-			#setting the prior here works if the Bayes net is already built
-			#setPrior(a[0], float(a[1:])
+            setPrior(bayesNetwork, a[0], float(a[1:]))
         elif o in ("-m"):
             print("flag: ", o)
             print("args: ", a)
