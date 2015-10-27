@@ -101,10 +101,12 @@ def parseJoint(arg):
 	jointVarList = []
 	newArg = ""
 	argLength = len(arg)
-	for i in range(0, argLength):
-		if arg[i] == '~':
+	i = 0
+	while (i < argLength):
+		if arg[i] == "~":
 			i = i + 1
 		newArg = newArg + arg[i].lower()
+		i = i + 1
 	length = len(newArg)
 	for i in range(0, length):
 		newVar = []
@@ -116,7 +118,6 @@ def parseJoint(arg):
 			    newVar.append(var + newArg[i])
 			    newVar.append(var + "~" + newArg[i])
 		jointVarList = newVar
-		i = i + 1
 	return jointVarList
 
 # Function to calculate and return the joint probability
@@ -134,7 +135,8 @@ def calcJointDistribution(network, arg):
 def calcJointProbability(network, arg):
 	probability = 1
 	length = len(arg)
-	for i in range(0, length):
+	i = 0
+	while (i < length):
 		if arg[i] == "~":
 			i = i + 1
 			newArg = "~" + arg[i]
@@ -148,7 +150,8 @@ def calcJointProbability(network, arg):
 def parseVariables(variables):
 	varList = []
 	length = len(variables)
-	for i in range(0, length):
+	i = 0
+	while (i < length):
 		if variables[i] == '~':
 			i = i + 1
 			var = variables[i-1] + variables[i]
@@ -177,6 +180,8 @@ def calcConditional(network, arg, con):
 		node = network["dyspnoea"]
 	else:
 		print("Requesting conditional distribution for an invalid variable: ", arg)
+	# Remove once you have this implemented ***********
+	conditional = 1
 	if (len(con) == 0):
 		conditional = calcMarginal(network, arg)[1]
 	elif con in node.conditionals:
@@ -221,7 +226,7 @@ def main():
         elif o in ("-j"):
             print("flag: ", o)
             print("args: ", a)
-            calcJointDistribution(bayesNetwork, a)
+            print(calcJointDistribution(bayesNetwork, a))
         else:
             assert False, "unhandled option"
 		
