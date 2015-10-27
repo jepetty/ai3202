@@ -42,14 +42,14 @@ def createNetwork():
 	pollutionNode.marginal = 0.9
 	smokerNode.marginal = 0.3
 	
-	cancerNode.conditionals["~PS"] = 0.05
-	cancerNode.conditionals["~P~S"] = 0.02
-	cancerNode.conditionals["PS"] = 0.03
-	cancerNode.conditionals["P~S"] = 0.001
-	xrayNode.conditionals["C"] = 0.9
-	xrayNode.conditionals["~C"] = 0.2
-	dyspnoeaNode.conditionals["C"] = 0.65
-	dyspnoeaNode.conditionals["~C"] = 0.3
+	cancerNode.conditionals["~ps"] = 0.05
+	cancerNode.conditionals["~p~s"] = 0.02
+	cancerNode.conditionals["ps"] = 0.03
+	cancerNode.conditionals["p~s"] = 0.001
+	xrayNode.conditionals["c"] = 0.9
+	xrayNode.conditionals["~c"] = 0.2
+	dyspnoeaNode.conditionals["c"] = 0.65
+	dyspnoeaNode.conditionals["~c"] = 0.3
 	
 	nodeNetwork = {"smoker": smokerNode, "pollution": pollutionNode, "cancer": cancerNode, "xray": xrayNode, "dyspnoea": dyspnoeaNode}
 	return nodeNetwork
@@ -65,41 +65,59 @@ def setPrior(network, arg, value):
 		print("Cannot set the prior for this variable")
 	
 def calcMarginal(network, arg):
-	length = len(arg)
-	for i in range(0,length):
-		if arg[i] == "P" or arg[i] == "p":
-			node = network["pollution"]
-			print("Pollution marginal probability: ", node.marginal)
-			return node.marginal
-		elif arg[i] == "S" or arg[i] == "s":
-			node = network["smoker"]
-			print ("Smoker marginal probability: ", node.marginal)
-			return node.marginal
-		elif arg[i] == "C" or arg[i] == "c":
-			node = network["cancer"]
-			conditionals = node.conditionals
-			pollution = network["pollution"]
-			smoker = network["smoker"]
-			marginal = conditionals["~PS"]*(1-pollution.marginal)*(smoker.marginal) + conditionals["~P~S"]*(1-pollution.marginal)*(1-smoker.marginal) + conditionals["PS"]*pollution.marginal*smoker.marginal + conditionals["P~S"]*pollution.marginal*(1-smoker.marginal)
-			print("Cancer marginal probability: ", marginal)
-			return marginal
-		elif arg[i] == "X" or arg[i] == "x":
-			node = network["xray"]
-			conditionals = node.conditionals
-			cancerMarginal = calcMarginal(network, "C")
-			marginal = conditionals["C"]*cancerMarginal + conditionals["~C"]*(1-cancerMarginal)
-			print("Xray marginal probability: ", marginal)
-			return marginal
-		elif arg[i] == "D" or arg[i] == "d":
-			node = network["dyspnoea"]
-			conditionals = node.conditionals
-			cancerMarginal = calcMarginal(network, "C")
-			marginal = conditionals["C"]*cancerMarginal + conditionals["~C"]*(1-cancerMarginal)
-			print("Dyspnoea marginal probability: ", marginal)
-			return marginal
-		else:
-			print("Requesting marginal distribution for an invalid variable")
-				
+	if arg == "P" or arg == "p":
+		node = network["pollution"]
+		return ("Pollution", node.marginal)
+	elif arg == "S" or arg == "s":
+		node = network["smoker"]
+		return ("Smoker", node.marginal)
+	elif arg == "C" or arg == "c":
+		node = network["cancer"]
+		conditionals = node.conditionals
+		pollution = network["pollution"]
+		smoker = network["smoker"]
+		marginal = conditionals["~ps"]*(1-pollution.marginal)*(smoker.marginal) + conditionals["~p~s"]*(1-pollution.marginal)*(1-smoker.marginal) + conditionals["ps"]*pollution.marginal*smoker.marginal + conditionals["p~s"]*pollution.marginal*(1-smoker.marginal)
+		return ("Cancer", marginal)
+	elif arg == "X" or arg == "x":
+		node = network["xray"]
+		conditionals = node.conditionals
+		cancerMarginal = calcMarginal(network, "C")
+		marginal = conditionals["c"]*cancerMarginal[1] + conditionals["~c"]*(1-cancerMarginal[1])
+		return ("Xray", marginal)
+	elif arg == "D" or arg == "d":
+		node = network["dyspnoea"]
+		conditionals = node.conditionals
+		cancerMarginal = calcMarginal(network, "c")
+		marginal = conditionals["C"]*cancerMarginal[1] + conditionals["~c"]*(1-cancerMarginal[1])
+		return ("Dyspnoea", marginal)
+	else:
+		print("Requesting marginal distribution for an invalid variable")
+
+# Function to calculate the conditional probability
+def calcConditional(network, arg, con):
+	conLength = len(con)
+	if arg == "p":
+		node = network["pollution"]
+	elif arg == "s":
+		node = network["smoker"]
+	elif arg == "c":
+		node = network["cancer"]
+		if con in node.conditionals:
+			conditional = node.conditionals[con]
+			return("Cancer", conditional)
+	elif arg == "x":
+		node = network["xray"]
+		if con in node.conditionals:
+			conditional = node.conditionals[con]
+			return("Xray", conditional)
+	elif arg == "d":
+		node = network["dyspnoea"]
+		if con in node.conditionals:
+			conditional = node.conditionals[con]
+			return("Dyspnoea", conditional)
+	else:
+		print("Requestion marginal distribution for an invalid variable")
+			
 # Main function to receive arguments, begin processing them
 def main():
     bayesNetwork = createNetwork()
@@ -120,7 +138,8 @@ def main():
             print("flag: ", o)
             print("args: ", a)
             print(type(a))
-            calcMarginal(bayesNetwork, a)
+            marginal = calcMarginal(bayesNetwork, a)
+            print(marginal[0], " marginal probability: ", marginal[1])
         elif o in ("-g"):
             print("flag: ", o)
             print("args: ", a)
@@ -128,7 +147,8 @@ def main():
             p = a.find("|")
             print(a[:p])
             print(a[p+1:])
-			#calcConditional(a[:p], a[p+1:])
+            conditional = calcConditional(bayesNetwork, a[:p], a[p+1:])
+            print(conditional[0], " conditional probability: ", conditional[1])
         elif o in ("-j"):
             print("flag: ", o)
             print("args: ", a)
