@@ -160,32 +160,31 @@ def parseVariables(variables):
 
 # Function to calculate the conditional probability
 def calcConditional(network, arg, con):
-	conList = parseVariables(con)
 	notBool = False
 	if arg[0] == '~':
 		notBool = True
 		arg = arg[1]
+	conList = parseVariables(con)
 	if arg == "p":
 		node = network["pollution"]
 	elif arg == "s":
 		node = network["smoker"]
 	elif arg == "c":
 		node = network["cancer"]
-		if con in node.conditionals:
-			conditional = node.conditionals[con]
-			return("Cancer", conditional)
 	elif arg == "x":
 		node = network["xray"]
-		if con in node.conditionals:
-			conditional = node.conditionals[con]
-			return("Xray", conditional)
 	elif arg == "d":
 		node = network["dyspnoea"]
-		if con in node.conditionals:
-			conditional = node.conditionals[con]
-			return("Dyspnoea", conditional)
 	else:
 		print("Requesting conditional distribution for an invalid variable: ", arg)
+	if (len(con) == 0):
+		conditional = calcMarginal(network, arg)[1]
+	elif con in node.conditionals:
+		conditional = node.conditionals[con]
+	if notBool:
+		return 1 - conditional
+	else:
+		return conditional
 	return 1
 			
 # Main function to receive arguments, begin processing them
