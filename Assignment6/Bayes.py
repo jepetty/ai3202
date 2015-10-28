@@ -215,7 +215,7 @@ def calcConditional(network, arg, con):
 		return 1 - conditional
 	else:
 		return conditional
-	return 1
+	return conditional
 
 # Helper function when conditional calculation is needed with one conditional
 def calcCondOne(node, network, con):
@@ -226,6 +226,11 @@ def calcCondOne(node, network, con):
 	else:
 		newCon = con
 	arg = node.name
+	if arg == newCon:
+		if notBool:
+			return 0
+		else:
+			return 1
 	if arg == "p" or arg == "s":
 		if newCon == "p" or newCon == "s":
 			return calcMarginal(network, arg)
@@ -234,7 +239,7 @@ def calcCondOne(node, network, con):
 		elif newCon == "d" or newCon == "x":
 			cond1 = calcConditional(network, arg, "c")*calcConditional(network, "c", con)
 			cond2 = calcConditonal(network, arg, "~c")*calcConditional(network, "~c", con)
-			return 
+			return cond1 + cond2
 	elif arg == "c":
 		if newCon == "p":
 			return calcConditional(network, arg, con+"s")*calcMarginal(network, "s") + calcConditional(network, arg, con + "~s")*calcMarginal(network, "~s")
