@@ -395,17 +395,17 @@ def calcCondThree(arg, network, conditionals):
 		if newCon1 == "p" or newCon1 == "s":
 			if newCon2 == "p" or newCon2 == "s" or newCon3 == "p" or newCon3 == "s":
 				# Case M1
-				print(condition1)
+				return calcConditional(network, arg, conditional1+conditional2)
 			else:
 				# Case M2
-				print(condition1)
+				return calcConditional(network, arg, conditional1 + conditional2)
 		elif newCon1 == "d" or newCon1 == "x":
 			if newCon2 == "d" or newCon2 == "x" or newCon3 == "d" or newCon3 == "x":
-				# Case M3
-				print(condition1)
+				# Case M2
+				return calcConditional(network, arg, condtional2 + conditional3)
 			else:
 				# Case M1
-				print(condition1)
+				return calcConditional(network, arg, conditional2 + conditional3)
 	elif newArg == "d" or newArg == "x":
 		if newCon1 == "p" or newCon1 == "s":
 			if newCon2 == "p" or newCon2 == "s":
