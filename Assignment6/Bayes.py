@@ -185,28 +185,30 @@ def calcConditional(network, arg, con):
 	notBool = False
 	if arg[0] == '~':
 		notBool = True
-		arg = arg[1]
+		newArg = arg[1]
+	else:
+		newArg = arg
 	conList = parseVariables(con)
-	if arg == "p":
+	if newArg == "p":
 		node = network["pollution"]
-	elif arg == "s":
+	elif newArg == "s":
 		node = network["smoker"]
-	elif arg == "c":
+	elif newArg == "c":
 		node = network["cancer"]
-	elif arg == "x":
+	elif newArg == "x":
 		node = network["xray"]
-	elif arg == "d":
+	elif newArg == "d":
 		node = network["dyspnoea"]
 	else:
 		print("Requesting conditional distribution for an invalid variable: ", arg)
 	if (len(conList) == 0):
-		conditional = calcMarginal(network, arg)
+		return calcMarginal(network, arg)
 	elif con in node.conditionals:
 		conditional = node.conditionals[con]
 	elif (len(conList) == 1):
 		conditional = calcCondOne(node, network, conList[0])
 	elif (len(conList) == 2):
-		conditional = calcCondTwo(node, network, conList)
+		return calcCondTwo(arg, network, conList)
 	elif (len(conList) == 3):
 		conditional = calcCondThree(node, network, conList)
 	if notBool:
@@ -242,6 +244,97 @@ def calcCondOne(node, network, con):
 	else:
 		conditional = calcConditional(network, node.name, "c")*calcConditional(network, "~c", con) + calcConditional(network, node.name, "~c")*calcConditional(network, "~c", con)
 	return conditional
+	
+def calcCondTwo(arg, network, conditionals):
+	condition1 = conditionals[0]
+	condition2 = conditionals[1]
+	if condition1[0] == "~":
+		newCon1 = condition1[1]
+	else:
+		newCon1 = condition1
+	if condition2[0] == "~":
+		newCon2 = condition[1]
+	else:
+		newCon2 = condition2
+	if arg[0] == "~":
+		newArg = arg[1]
+	else:
+		newArg = arg
+	for key in network:
+		nd = network[key]
+		if nd.name == newCon1:
+			newNode1 = nd
+		elif nd.name == newCon2:
+			newNode2 = nd
+	if newArg == "p" or newArg == "s":
+		if newCon1 == "x" or newCon2 == "d":
+			if newCon2 == "x" or newCon2 == "d":
+				# Case 2
+				cond1 = calcConditional(network, arg, "c")*calcConditional(network, "c", conditionals[0]+conditionals[1])
+				cond2 = calcConditional(network, arg, "~c")*calcConditional(network, "~c", conditionals[0]+conditionals[1])
+				return cond1 + cond2
+			elif newCon2 == "s" or newCon2 == "p":
+				# Case 3
+				cond1 = calcConditional(network, arg, conditionals[1] + "c")*calcConditional(network, "c", conditionals[1]+conditionals[0])
+				cond2 = calcConditional(network, arg, conditionals[1] + "~c")*calcConditional(network, "~c", conditionals[1]+conditionals[0])
+				return cond1 + cond2
+			elif newCon2 == "c":
+				# Case 4
+				return calcConditional(network, arg, conditionals[1])
+		elif newCon1 == "p" or newCon1 == "s":
+			if newCon2 == "c":
+				# Case 1
+				condNum = calcConditional(network, conditionals[1], arg + conditionals[0])*calcJointProbability(network, arg + conditionals[0])
+				condDen = calcConditional(network, conditionals[0], conditionals[1])*calcMarginal(network, conditionals[1])
+				return condNum/condDen
+			elif newCon2 == "x" or newCon2 == "d":
+				# Case 3
+				cond1 = calcConditional(network, arg, conditionals[0] + "c")*calcConditional(network, "c", conditionals[1]+conditionals[0])
+				cond2 = calcConditional(network, arg, conditionals[0] + "~c")*calcConditional(network, "~c", conditionals[1]+conditionals[0])
+				return cond1 + cond2
+		elif newCon1 == "c":
+			if newCon2 == "x" or newCon2 == "d":
+				# Case 4
+				return calcConditional(network, arg, conditionals[0])
+			elif newCon2 == "s" or newCon2 == "p":
+				# Case 1
+				condNum = calcConditional(network, conditionals[0], arg + conditionals[1])*calcJointProbability(network, arg + conditionals[1])
+				condDen = calcConditional(network, conditionals[1], conditionals[0])*calcMarginal(network, conditionals[0])
+				return condNum/condDen
+	elif newArg == "c":
+		if newCon1 == "x" or newCon1 == "d":
+			return calcConditional(network, arg, conditionals[1])
+		elif newCon2 == "x" or newCon2 == "d":
+			return calcConditional(network, arg, conditionals[0])
+		else:
+			condNum = calcConditional(network, conditionals[0], conditionals[1]) * calcJointProbability(network, arg + conditionals[0])
+			condDen = calcMarginal(network, conditionals[0]) * calcMarginal(network, conditionals[1])
+			return condNum/condDen
+	elif newArg == "d" or newArg == "x":
+		if newCon1 == "x" or newCon1 == "d":
+			if newCon2 == "c":
+				return calcConditional(network, arg, conditionals[1])
+			else:
+				cond1 = calcConditional(network, arg, "c")*calcConditional(network, "c", conditionals[1])
+				cond2 = calcConditional(network, arg, "~c")*calcConditional(network, "~c", conditionals[1])
+				return cond1 + cond2
+		elif newCon1 == "c":
+			if newCon2 == "x" or newCon2 == "d":
+				return calcConditional(network, arg, conditionals[0])
+			elif newCon2 == "s" or newCon2 == "p":
+				return calcConditional(network, arg, conditionals[0])
+		elif newCon1 == "p" or newCon2 == "s":
+			if newCon2 == "s" or newCon2 == "p":
+				cond1 = calcConditional(network, arg, "c") * calcConditional(network, "c", conditionals[0]+conditionals[1])
+				cond2 = calcConditional(network, arg, "~c") * calcConditional(network, "~c", conditionals[0]+conditionals[1])
+				return cond1 + cond2
+			elif newCon2 == "d" or newCon2 == "x":
+				cond1 = calcConditional(network, arg, "c")*calcConditional(network, "c", conditionals[0])
+				cond2 = calcConditional(network, arg, "~c")*calcConditional(network, "~c", conditionals[0])
+				return cond1 + cond2
+			elif newCon2 == "c": 
+				return calcConditional(network, arg, conditionals[1])
+				
 	
 # Main function to receive arguments, begin processing them
 def main():
