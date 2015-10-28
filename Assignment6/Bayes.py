@@ -402,7 +402,7 @@ def calcCondThree(arg, network, conditionals):
 		elif newCon1 == "d" or newCon1 == "x":
 			if newCon2 == "d" or newCon2 == "x" or newCon3 == "d" or newCon3 == "x":
 				# Case M2
-				return calcConditional(network, arg, condtional2 + conditional3)
+				return calcConditional(network, arg, conditional2 + conditional3)
 			else:
 				# Case M1
 				return calcConditional(network, arg, conditional2 + conditional3)
