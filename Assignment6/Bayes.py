@@ -222,28 +222,35 @@ def calcCondOne(node, network, con):
 	notBool = False
 	if con[0] == "~":
 		notBool = True
-		newcon = con[1]
+		newCon = con[1]
 	else:
-		newcon = con
-	if newcon in node.parents:
-		for parent in node.parents:
-			if parent != newcon:
-				other = parent
-		conditional = node.conditionals[con + other]*calcMarginal(network, other) + node.conditionals[con + "~" + other]*calcMarginal(network, "~" + other)
-	elif newcon in node.children:
-		conditional = (calcConditional(network, con, node.name) * calcMarginal(network, node.name))/calcMarginal(network, con)
-	elif newcon in node.grandchildren:
-		conditional = (calcMarginal(network, node.name) * (calcConditional(network, "c", node.name) * calcConditional(network, con, "c") + calcConditional(network, "~c", node.name) * calcConditional(network, con, "~c")))/calcMarginal(network, con)
-	elif newcon in node.grandparents:
-		for gp in node.grandparents:
-			if gp != newcon:
-				other = gp
-		condP1 = calcConditional(network, node.name, "c") * (calcConditional(network, "c", con + other)*calcMarginal(network, other) + calcConditional(network, "c", con + "~" + other)*calcMarginal(network, "~" + other))
-		condP2 = calcConditional(network, node.name, "~c")*(calcConditional(network, "~c", con + other)*calcMarginal(network, other) + calcConditional(network, "~c", con + "~" + other)*calcMarginal(network, "~" + other))
-		conditional = condP1 + condP2
-	else:
-		conditional = calcConditional(network, node.name, "c")*calcConditional(network, "~c", con) + calcConditional(network, node.name, "~c")*calcConditional(network, "~c", con)
-	return conditional
+		newCon = con
+	arg = node.name
+	if arg == "p" or arg == "s":
+		if newCon == "p" or newCon == "s":
+			return calcMarginal(network, arg)
+		elif newCon == "c":
+			return (calcConditional(network, con, arg)*calcMarginal(network, arg))/calcMarginal(network, con)
+		elif newCon == "d" or newCon == "x":
+			cond1 = calcConditional(network, arg, "c")*calcConditional(network, "c", con)
+			cond2 = calcConditonal(network, arg, "~c")*calcConditional(network, "~c", con)
+			return 
+	elif arg == "c":
+		if newCon == "p":
+			return calcConditional(network, arg, con+"s")*calcMarginal(network, "s") + calcConditional(network, arg, con + "~s")*calcMarginal(network, "~s")
+		elif newCon == "s":
+			return calcConditional(network, arg, con+"p")*calcMarginal(network, "p") + calcConditional(network, arg, con + "~p")*calcMarginal(network, "~p")
+		elif newCon == "d" or newCon == "x":
+			return (calcConditional(network, con, arg)*calcMarginal(network, arg))/calcMarginal(network, con)
+	elif arg == "d" or arg == "x":
+		if newCon == "d" or newCon == "x":
+			cond1 = calcConditional(network, arg, "c")*calcConditional(network, "c", con)
+			cond2 = calcConditional(network, arg, "~c") * calcConditional(network, "~c", con)
+			return cond1 + cond2
+		elif newCon == "s" or newCon == "p":
+			cond1 = calcConditional(network, arg, "c")*calcConditional(network, "c", con)
+			cond2 = calcConditional(network, arg, "~c") * calcConditional(network, "~c", con)
+			return cond1 + cond2
 	
 def calcCondTwo(arg, network, conditionals):
 	conditional1 = conditionals[0]
