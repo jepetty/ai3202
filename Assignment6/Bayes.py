@@ -210,7 +210,7 @@ def calcConditional(network, arg, con):
 	elif (len(conList) == 2):
 		return calcCondTwo(arg, network, conList)
 	elif (len(conList) == 3):
-		conditional = calcCondThree(node, network, conList)
+		conditional = calcCondThree(arg, network, conList)
 	if notBool:
 		return 1 - conditional
 	else:
@@ -246,26 +246,20 @@ def calcCondOne(node, network, con):
 	return conditional
 	
 def calcCondTwo(arg, network, conditionals):
-	condition1 = conditionals[0]
-	condition2 = conditionals[1]
-	if condition1[0] == "~":
-		newCon1 = condition1[1]
+	conditional1 = conditionals[0]
+	conditional2 = conditionals[1]
+	if conditional1[0] == "~":
+		newCon1 = conditional1[1]
 	else:
-		newCon1 = condition1
-	if condition2[0] == "~":
-		newCon2 = condition[1]
+		newCon1 = conditional1
+	if conditional2[0] == "~":
+		newCon2 = conditional2[1]
 	else:
-		newCon2 = condition2
+		newCon2 = conditional2
 	if arg[0] == "~":
 		newArg = arg[1]
 	else:
 		newArg = arg
-	for key in network:
-		nd = network[key]
-		if nd.name == newCon1:
-			newNode1 = nd
-		elif nd.name == newCon2:
-			newNode2 = nd
 	if newArg == "p" or newArg == "s":
 		if newCon1 == "x" or newCon2 == "d":
 			if newCon2 == "x" or newCon2 == "d":
@@ -294,7 +288,6 @@ def calcCondTwo(arg, network, conditionals):
 				return cond1 + cond2
 		elif newCon1 == "c":
 			if newCon2 == "x" or newCon2 == "d":
-				# Case 4
 				return calcConditional(network, arg, conditionals[0])
 			elif newCon2 == "s" or newCon2 == "p":
 				# Case 1
@@ -334,7 +327,126 @@ def calcCondTwo(arg, network, conditionals):
 				return cond1 + cond2
 			elif newCon2 == "c": 
 				return calcConditional(network, arg, conditionals[1])
+
+def calcCondThree(arg, network, conditionals):
+	conditional1 = conditionals[0]
+	conditional2 = conditionals[1]
+	conditional3 = conditionals[2]
+	if conditional1[0] == "~":
+		newCon1 = conditional1[1]
+	else:
+		newCon1 = conditional1
+	if conditional2[0] == "~":
+		newCon2 = conditional[1]
+	else:
+		newCon2 = conditional2
+	if conditional3[0] == "~":
+		newCon3 = conditional3[1]
+	else:
+		newCon3 = conditional3
+	if arg[0] == "~":
+		newArg = arg[1]
+	else:
+		newArg = arg	
+	if newArg == "s" or newArg == "p":
+		if newCon1 == "p" or newCon1 == "s":
+			if newCon2 == "x" or newCon2 == "d":
+				if newCon3 == "x" or newCon3 == "d":
+					# Case T2
+					cond1 = calcConditional(network, arg, conditional1 + "c")*calcConditional(network, "c", conditional2 + conditional3)
+					cond2 = calcConditional(network, arg, conditional1 + "~c")*calcConditional(network, "~c", conditional2 + conditional3)
+					return cond1 + cond2
+				elif newCon3 == "c":
+					# Case T1
+					return calcConditional(network, arg, conditional3+conditional1)
+			elif newCon2 == "c":
+				# Case T1
+				return calcConditional(network, arg, conditional2 + conditional1)
+		elif newCon1 == "d" or newCon1 == "x":
+			if newCon2 == "d" or newCon2 == "s":
+				if newCon3 == "p" or newCon3 == "s":
+					# Case T2
+					cond1 = calcConditional(network, arg, conditional3 + "c")*calcConditional(network, "c", conditional1+conditional2)
+					cond2 = calcConditional(network, arg, conditional3 + "~c")*calcConditional(network, "~c", conditional1+conditional2)
+					return cond1 + cond2
+				elif newCon3 == "c":
+					# Case T3
+					return calcConditional(network, arg, conditional3)
+			elif newCon2 == "c":
+				if newCon3 == "p" or newCon3 == "s":
+					# Case T1
+					return calcConditional(network, arg, conditional3 + conditional2)
+				elif newCon3 == "d" or newCon3 == "x":
+					# Case T3
+					return calcConditional(network, arg, conditional3)
+		elif newCon1 == "c":
+			if newCon2 == "d" or newCon2 == "x":
+				if newCon3 == "d" or newCon3 == "x":
+					# Case T3
+					return calcConditional(network, arg, conditional1)
+				elif newCon3 == "p" or newCon3 == "s":
+					# Case T1
+					return calcConditional(network, arg, conditional1 + conditional3)
+			elif newCon2 == "s" or newCon2 == "p":
+				# Case T1
+				return calcConditional(network, arg, conditional1 + conditional2)
 				
+	elif newArg == "c":
+		if newCon1 == "p" or newCon1 == "s":
+			if newCon2 == "p" or newCon2 == "s" or newCon3 == "p" or newCon3 == "s":
+				# Case M1
+				print(condition1)
+			else:
+				# Case M2
+				print(condition1)
+		elif newCon1 == "d" or newCon1 == "x":
+			if newCon2 == "d" or newCon2 == "x" or newCon3 == "d" or newCon3 == "x":
+				# Case M3
+				print(condition1)
+			else:
+				# Case M1
+				print(condition1)
+	elif newArg == "d" or newArg == "x":
+		if newCon1 == "p" or newCon1 == "s":
+			if newCon2 == "p" or newCon2 == "s":
+				if newCon3 == "c":
+					# Case B1
+					return calcConditional(network, arg, conditional3)
+				elif newCon3 == "d" or newCon3 == "x":
+					# Case B3
+					cond1 = calcConditional(network, arg, "c" + conditional3)*calcConditional(network, "c", conditional2 + conditional1)
+					cond2 = calcConditional(network, arg, "~c" + conditional3)*calcConditional(network, "~c", conditional2 + conditional1)
+					return cond1 + cond2
+			elif newCon2 == "d" or newCon2 == "x":
+				if newCon3 == "c":
+					# Case B2
+					calcConditional(network, arg, conditional3)
+				elif newCon3 == "s" or newCon3 == "p":
+					# Case B3
+					cond1 = calcConditional(network, arg, condition2 + "c") * calcConditional(network, "c", condition1 + condition3)
+					cond2 = calcConditional(network, arg, condition2 + "~c") * calcConditional(network, "~c", condition1 + condition3)
+			elif newCon2 == "c":
+				if newCon3 == "x" or newCon3 == "d":
+					# Case B2
+					return calcConditional(network, arg, conditional2)
+				elif newCon3 == "s" or newCon3 == "p":
+					# Case B1
+					return calcConditonal(network, arg, conditional2)
+		elif newCon1 == "d" or newCon1 == "x":
+			if newCon2 == "c" or newCon3 == "c":
+				# Case B2
+				return calcConditional(network, arg, conditional2)
+			else:
+				# Case B3
+				cond1 = calcConditional(network, arg, condition1 + "c") * calcConditional(network, "c", condition2 + condition3)
+				cond2 = calcConditional(network, arg, condition1 + "~c") * calcConditional(network, "~c", condition2 + condition3)
+		elif newCon1 == "c":
+			if newCon2 == "d" or newCon2 == "x" or newCon3 == "d" or newCon3 == "x":
+				# Case B2
+				return calcConditional(network, arg, conditional1)
+			else:
+				# Case B1
+				return calcConditional(network, arg, conditional1)
 	
 # Main function to receive arguments, begin processing them
 def main():
