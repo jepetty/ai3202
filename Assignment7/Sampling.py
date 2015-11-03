@@ -5,35 +5,6 @@
 
 import sys
 
-# Create the Bayes network for this problem
-# Define node class to represent each node in the Bayes Net
-class Node:
-	def __init__(self):
-		self.marginal = 0
-		self.conditionals = {}
-		self.name = ""
-
-# Function to create the Bayes net with the proper nodes
-def createNetwork():
-	cloudNode = Node()
-	sprinklerNode = Node()
-	rainNode = Node()
-	grassNode = Node()
-	
-	cloudNode.name = "c"
-	sprinklerNode.name = "s"
-	rainNode.name = "r"
-	grassNode.name = "w"
-	
-	cloudNode.marginal = 0.5
-	
-	sprinklerNode.conditionals = {"c": 0.1, "~c": 0.5}
-	rainNode.conditionals = {"c": 0.8, "~c": 0.2}
-	grassNode.conditionals = {"sr": 0.99, "s~r": 0.9, "~sr": 0.9, "~s~r": 0} 
-	
-	return {"c": cloudNode, "s": sprinklerNode, "r": rainNode, "w": grassNode}
-
-# 0.56, 0.68, 0.32, 0.27, 0.77, 0.74, 0.79, 0.11, 0.29, 0.69, 0.99, 0.79, 0.21, 0.2, 0.43, 0.81, 0.9, 0.0, 0.91, 0.01]
 # Hard code sample data into program
 samples = [0.82, 0.56, 0.08, 0.81, 0.34, 0.22, 0.37, 0.99, 0.55, 0.61, 0.31, 0.66, 0.28, 1, 0.95, 0.71, 0.14, 0.1, 1.0, \
 	0.71, 0.1, 0.6, 0.64, 0.73, 0.39, 0.03, 0.99, 1.0, 0.97, 0.54, 0.8, 0.97, 0.07, 0.69, 0.43, 0.29, 0.61, 0.03, 0.13, \
@@ -130,80 +101,33 @@ def Problem3():
 		if samples[i] < 0.5:
 			cloudy = True
 		i = i + 1
-		if cloudy == True:
-			if samples[i] < 0.1:
-				sprinkling = True
-			if samples[i+1] < 0.8:
-				raining = True
-		else:
-			if samples[i] < 0.5:
-				sprinkling = True
-			if samples[i+1] < 0.2:
-				raining = True
-		i = i + 2
-		if sprinkling == True and raining == True:
-			if samples[i] < 0.99:
-				wetGrass = True
-		elif sprinkling == True and raining == False:
-			if samples[i] < 0.9:
-				wetGrass = True
-		elif sprinkling == False and raining == True:
-			if samples[i] < 0.9:
-				wetGrass = True
 		sample3a.append([cloudy, sprinkling, raining, wetGrass])
 		cloudy = False
-		sprinkling = False
-		raining = False
-		wetGrass = False
-		i = i + 1
 	# while loop to create samples for 3b
-	j = 0
-	while j < sampleSize-1:
-		if samples[j] < 0.5:
+	i = 0
+	while i < sampleSize:
+		if samples[i] < 0.5:
 			cloudy = True
-		j = j + 1
+		i = i + 1
 		if cloudy == True:
-			if samples[j] < 0.8:
+			if samples[i] < 0.8:
 				raining = True
-				j = j + 1
-				if  samples[j] < 0.1:
-					sprinkling = True
-					j = j + 1
-					if samples[j] < 0.99:
-						wetGrass = True
-				else:
-					j = j + 1
-					if samples[j] < 0.9:
-						wetGrass = True
+				i = i + 1
+				sample3b.append([cloudy, sprinkling, raining, wetGrass])
 			else:
-				j = j + 1
-				continue
+				i = i + 1
 		else:
-			if samples[j] < 0.2:
+			if samples[i] < 0.2:
 				raining = True
-				j = j + 1
-				if samples[j] < 0.5:
-					sprinkling = True
-					j = j + 1
-					if samples[j] < 0.99:
-						wetGrass = True
-					j = j + 1
-				else:
-					j = j + 1
-					if samples[j] < 0.9:
-						wetGrass = True
-					j = j + 1
+				i = i + 1
+				sample3b.append([cloudy, sprinkling, raining, wetGrass])
 			else:
-				j = j + 1
-				continue
-		sample3b.append([cloudy, sprinkling, raining, wetGrass])
+				i = i + 1
 		cloudy = False
-		sprinkling = False
 		raining = False
-		wetGrass = False
 	# while loop to create samples for 3c
 	i = 0
-	while i < sampleSize-4:
+	while i < sampleSize:
 		if samples[i] < 0.5:
 			cloudy = True
 		i = i + 1
@@ -298,7 +222,6 @@ def Problem3():
 	
 # Create main function to run program
 def main():
-	network = createNetwork()
 	question1 = Problem1()
 	Problem1Sample(question1)
 	Problem3()		
