@@ -238,7 +238,7 @@ def calcCondOne(node, network, con):
 			return (calcConditional(network, con, arg)*calcMarginal(network, arg))/calcMarginal(network, con)
 		elif newCon == "d" or newCon == "x":
 			cond1 = calcConditional(network, arg, "c")*calcConditional(network, "c", con)
-			cond2 = calcConditonal(network, arg, "~c")*calcConditional(network, "~c", con)
+			cond2 = calcConditional(network, arg, "~c")*calcConditional(network, "~c", con)
 			return cond1 + cond2
 	elif arg == "c":
 		if newCon == "p":
