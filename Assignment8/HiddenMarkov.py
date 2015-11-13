@@ -51,6 +51,24 @@ def calcProbabilities():
 			states[state].transitions[transition] = (states[state].transitions[transition] + 1)/(states[state].count + len(states[state].trans))
 
 
+def outputFunction():
+	f = open("outputFile.txt", "r+")
+	f.write("P(Et | Xt)\n")
+	for state in states:
+		for emission in states[state].evidence:
+			newEmiss = "P(" + emission[0] + " | " + emission[1] + ") = "
+			f.write(newEmiss + str(states[state].emissions[emission]) + "\n")
+	f.write("P(Xt+1 | Xt)\n")
+	for state in states:
+		for transition in states[state].trans:
+			newTrans = "P(" + transition[0] + " | " + transition[1] + ") = "
+			f.write(newTrans + str(states[state].transitions[transition]) + "\n")
+	f.write("P(Xt)\n")
+	for state in states:
+		newState = "P(" + state + ") = "
+		f.write(newState + str(states[state].dummy) + "\n")
+		
+
 if __name__ == "__main__":
 	# Create dictionaries to store number of states, probabilities, etc.
 	states = { "_": State("_"), "a": State("a"), "b": State("b"),"c": State("c"), "d": State("d"), "e": State("e"), "f": State("f"),  \
@@ -69,6 +87,7 @@ if __name__ == "__main__":
 	transitionProbs = {}
 	emissionProbs = {}
 	calcProbabilities()
+	outputFunction()
 
 
 
