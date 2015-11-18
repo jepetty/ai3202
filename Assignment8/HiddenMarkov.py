@@ -13,8 +13,15 @@ class State:
 		self.transitions = {}
 		self.dummy = 0
 
+class Viterbi:
+	def __init__(self):
+		self.letter = lett
+		self.probStates = {}
+		self.bpointer = ""
+		self.max = 0
+
 # Read in data from typos20.data
-def parseData():
+def parseData1():
 	totalCount = 0.0
 	f = open("typos20.data", "r")
 	data = f.readlines()
@@ -41,6 +48,7 @@ def parseData():
 	f.close()
 	return totalCount
 
+# Function to calculate the emission and transition probabilitites for each state
 def calcProbabilities():
 	for state in states:
 		# calculate dummy probabilities
@@ -50,8 +58,8 @@ def calcProbabilities():
 		for transition in states[state].trans:
 			states[state].transitions[transition] = (states[state].transitions[transition] + 1)/(states[state].count + len(states[state].trans))
 
-
-def outputFunction():
+# Function to output the results of part 1 to a text file
+def outputFunction1():
 	f = open("outputFile.txt", "r+")
 	f.write("P(Et | Xt)\n")
 	for state in states:
@@ -67,7 +75,19 @@ def outputFunction():
 	for state in states:
 		newState = "P(" + state + ") = "
 		f.write(newState + str(states[state].dummy) + "\n")
-		
+	
+# Function to parse the second data set we will be using for our Viterbi calculations	
+def parseData2():
+	f = open("typos20Test.data", "r")
+	f.readline() # Need to ignore first line of text file -> Garbage!
+	data = f.readlines()
+	observed = []
+	for line in data:
+		(x,e) = line.split(" ")
+		observed.append(e[0])
+	f.close
+	return observed
+
 
 if __name__ == "__main__":
 	# Create dictionaries to store number of states, probabilities, etc.
@@ -77,7 +97,7 @@ if __name__ == "__main__":
 		"u": State("u"), "v": State("v"), "w": State("w"), "x": State("x"), "y": State("y"), "z": State("z") }
 	transitionCounts = {}
 	emissionCounts = {}
-	totalCount = parseData()
+	totalCount = parseData1()
 	
 	default = 1.0/(totalCount + 27.0)
 	statesProbs = { "_": default, "a": default, "b": default,"c": default, "d": default, "e": default, "f": default,  \
@@ -87,7 +107,8 @@ if __name__ == "__main__":
 	transitionProbs = {}
 	emissionProbs = {}
 	calcProbabilities()
-	outputFunction()
+	# outputFunction1()
+	obsStates = parseData2()
 
 
 
