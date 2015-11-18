@@ -1,5 +1,5 @@
 Repository for Assignment 2 for CSCI 3202 - Artificial Intelligence. This assignment focuses on implementing AStarSearch and using and creating heuristics.
-
+test
 Heuristic 1:
 The Manhattan distance is found by adding the change in x-distance between two points and the change in y-distance between those points. ie:
 distMan = |x2-x1| + |y2-y1|
