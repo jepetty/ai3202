@@ -3,13 +3,21 @@
 # November 13, 2015
 # Assignment 8
 
+import math
+
 class State:
 	def __init__(self, lett):
 		self.letter = lett
 		self.count = 0
-		self.trans = []
-		self.evidence = []
+		self.emissionCounts = {"a"+lett: 1, "b"+lett: 1, "c"+lett: 1, "d"+lett: 1, "e"+lett: 1, "f"+lett: 1, "g"+lett: 1, \
+		"h"+lett: 1, "i"+lett: 1, "j"+lett: 1, "k"+lett: 1, "l"+lett: 1, "m"+lett: 1, "n"+lett: 1, "o"+lett: 1, \
+		"p"+lett: 1, "q"+lett: 1, "r"+lett: 1, "s"+lett: 1, "t"+lett: 1, "u"+lett: 1, "v"+lett: 1, "w"+lett: 1, \
+		"x"+lett: 1, "y"+lett: 1, "z"+lett: 1, "_"+lett: 1}
 		self.emissions = {}
+		self.transitionCounts = {lett+"a": 1, lett+"b": 1, lett+"c": 1, lett+"d": 1, lett+"e": 1, lett+"f": 1, lett+"g": 1, \
+		lett+"h": 1, lett+"i": 1, lett+"j": 1, lett+"k": 1, lett+"l": 1, lett+"m": 1, lett+"n": 1, lett+"o": 1, \
+		lett+"p": 1, lett+"q": 1, lett+"r": 1, lett+"s": 1, lett+"t": 1, lett+"u": 1, lett+"v": 1, lett+"w": 1, \
+		lett+"x": 1, lett+"y": 1, lett+"z": 1, lett+"_": 1}
 		self.transitions = {}
 		self.dummy = 0
 
@@ -29,21 +37,17 @@ def parseData1():
 	for line in data:
 		# keep track of total count for dummy calculations
 		totalCount = totalCount + 1.0
+		# split into x actual value and e observed value
 		(x, e) = line.split(" ")
 		states[x].count = states[x].count + 1.0
-		emission = x + e[0]
-		if emission in states[x].emissions:
-			states[x].emissions[emission] = states[x].emissions[emission] + 1.0
-		else:
-			states[x].evidence.append(emission)
-			states[x].emissions[emission] = 1.0
+		# Emission formated like e|x
+		emission = e[0] + x
+		states[x].emissionCounts[emission] = states[x].emissionCounts[emission] + 1.0
 		if state != "":
-			transition = state + x
-			if transition in states[x].transitions:
-				states[x].transitions[transition] = states[x].transitions[transition] + 1.0
-			else:
-				states[x].trans.append(transition)
-				states[x].transitions[transition] = 1.0
+			# Formatted like xt+1|x
+			# Basically, for this x, what's the most likely next sequence of values
+			transition = x + state
+			states[x].transitionCounts[transition] = states[x].transitionCounts[transition] + 1.0
 		state = x
 	f.close()
 	return totalCount
@@ -53,22 +57,22 @@ def calcProbabilities():
 	for state in states:
 		# calculate dummy probabilities
 		states[state].dummy = (states[state].count + 1.0)/(totalCount + 27.0)
-		for emission in states[state].evidence:
-			states[state].emissions[emission] = (states[state].emissions[emission] + 1)/(states[state].count + len(states[state].evidence))
-		for transition in states[state].trans:
-			states[state].transitions[transition] = (states[state].transitions[transition] + 1)/(states[state].count + len(states[state].trans))
+		for emission in states[state].emissionCounts:
+			states[state].emissions[emission] = (states[state].emissionCounts[emission])/(states[state].count + 27)
+		for transition in states[state].transitionCounts:
+			states[state].transitions[transition] = (states[state].transitionCounts[transition])/(states[state].count + 27)
 
 # Function to output the results of part 1 to a text file
 def outputFunction1():
 	f = open("outputFile.txt", "r+")
 	f.write("P(Et | Xt)\n")
 	for state in states:
-		for emission in states[state].evidence:
+		for emission in states[state].emissions:
 			newEmiss = "P(" + emission[0] + " | " + emission[1] + ") = "
 			f.write(newEmiss + str(states[state].emissions[emission]) + "\n")
 	f.write("P(Xt+1 | Xt)\n")
 	for state in states:
-		for transition in states[state].trans:
+		for transition in states[state].transitions:
 			newTrans = "P(" + transition[0] + " | " + transition[1] + ") = "
 			f.write(newTrans + str(states[state].transitions[transition]) + "\n")
 	f.write("P(Xt)\n")
@@ -87,6 +91,19 @@ def parseData2():
 		observed.append(e[0])
 	f.close
 	return observed
+
+def calcFirstDay(observ):
+	firstProbs = {}
+	for state in states:
+		emission = observ + states[state].letter
+		prob = math.log10(states[state].emissions[emission]) + math.log10(states[state].dummy)
+		firstProbs[states[state].letter] = prob
+	print firstProbs
+	return firstProbs
+
+def calcSecondDay(viterbis, observes):
+	for observation in observes:
+		print observation
 
 
 if __name__ == "__main__":
@@ -107,8 +124,11 @@ if __name__ == "__main__":
 	transitionProbs = {}
 	emissionProbs = {}
 	calcProbabilities()
-	# outputFunction1()
+	outputFunction1()
 	obsStates = parseData2()
+	viterbiNodes = []
+	viterbiNodes.append(calcFirstDay(obsStates[0]))
+	#calcSecondDay(viterbiNodes,obsStates[1:])
 
 
 
