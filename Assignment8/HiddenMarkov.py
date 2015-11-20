@@ -63,20 +63,16 @@ def calcProbabilities():
 # Function to output the results of part 1 to a text file
 def outputFunction1():
 	f = open("outputFile.txt", "r+")
-	f.write("P(Et | Xt)\n")
-	for state in states:
-		for emission in states[state].emissions:
-			newEmiss = "P(" + emission[0] + " | " + emission[1] + ") = "
-			f.write(newEmiss + str(states[state].emissions[emission]) + "\n")
-	f.write("P(Xt+1 | Xt)\n")
+	f.write("Transition Probabilitites:\n")
 	for state in states:
 		for transition in states[state].transitions:
-			newTrans = "P(" + transition[0] + " | " + transition[1] + ") = "
+			newTrans = transition[0] + "    " + transition[1] + "\n"
 			f.write(newTrans + str(states[state].transitions[transition]) + "\n")
-	f.write("P(Xt)\n")
+	f.write("Emission Probabilitites:\n")
 	for state in states:
-		newState = "P(" + state + ") = "
-		f.write(newState + str(states[state].dummy) + "\n")
+		for emission in states[state].emissions:
+			newEmiss = emission[0] + "    " + emission[1] + "\n"
+			f.write(newEmiss + str(states[state].emissions[emission]) + "\n")
 	f.close
 	
 # Function to parse the second data set we will be using for our Viterbi calculations	
