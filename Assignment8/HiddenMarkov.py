@@ -81,11 +81,13 @@ def parseData2():
 	f.readline() # Need to ignore first line of text file -> Garbage!
 	data = f.readlines()
 	observed = []
+	correct = []
 	for line in data:
 		(x,e) = line.split(" ")
 		observed.append(e[0])
+		correct.append(x)
 	f.close
-	return observed
+	return (observed, correct)
 
 # Uses dummy probabilitites to calculate probabilitites for each state on first day, stores them in a new node
 def calcFirstDay(observ):
@@ -136,6 +138,18 @@ def createPath(viterbis):
 		backpointer = bp
 	return path
 
+# Create output function for the second part of the assignment
+def outputFunction2(path, correctLett):
+	pathLength = len(path)
+	f = open("outputFile2.txt", "r+")
+	wrongCount = 0.0
+	for i in range(0, pathLength):
+		f.write(path[i]+"\n")
+		if path[i] != correctLett[i]:
+			wrongCount = wrongCount + 1.0
+	f.write("Error rate: " + str(wrongCount/pathLength))
+	f.close
+
 if __name__ == "__main__":
 	# Create dictionaries to store number of states, probabilities, etc.
 	states = { "_": State("_"), "a": State("a"), "b": State("b"),"c": State("c"), "d": State("d"), "e": State("e"), "f": State("f"),  \
@@ -155,11 +169,12 @@ if __name__ == "__main__":
 	emissionProbs = {}
 	calcProbabilities()
 	outputFunction1()
-	obsStates = parseData2()
+	(obsStates, correct) = parseData2()
 	viterbiNodes = []
 	viterbiNodes.append(calcFirstDay(obsStates[0]))
 	viterbiNodes = calcDay(viterbiNodes, obsStates[1:])
 	viterbiPath = createPath(viterbiNodes)
+	outputFunction2(viterbiPath, correct)
 
 
 
