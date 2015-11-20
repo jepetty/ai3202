@@ -66,13 +66,16 @@ def outputFunction1():
 	f.write("Transition Probabilitites:\n")
 	for state in states:
 		for transition in states[state].transitions:
-			newTrans = transition[0] + "    " + transition[1] + "\n"
+			newTrans = "P(" + transition[0] + "|" + transition[1] + ") = "
 			f.write(newTrans + str(states[state].transitions[transition]) + "\n")
 	f.write("Emission Probabilitites:\n")
 	for state in states:
 		for emission in states[state].emissions:
-			newEmiss = emission[0] + "    " + emission[1] + "\n"
+			newEmiss = "P(" + emission[0] + "|" + emission[1] + ") = "
 			f.write(newEmiss + str(states[state].emissions[emission]) + "\n")
+	f.write("Initial Probabilitites:\n")
+	for state in states:
+		f.write("P(" + state + ") = " + str(states[state].dummy) + "\n")
 	f.close
 	
 # Function to parse the second data set we will be using for our Viterbi calculations	
