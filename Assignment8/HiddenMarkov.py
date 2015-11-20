@@ -23,10 +23,8 @@ class State:
 
 class Viterbi:
 	def __init__(self):
-		self.letter = lett
 		self.probStates = {}
-		self.bpointer = ""
-		self.max = 0
+		self.bpointers = {}
 
 # Read in data from typos20.data
 def parseData1():
@@ -92,18 +90,33 @@ def parseData2():
 	f.close
 	return observed
 
+# Uses dummy probabilitites to calculate probabilitites for each state on first day, stores them in a new node
 def calcFirstDay(observ):
 	firstProbs = {}
 	for state in states:
 		emission = observ + states[state].letter
-		prob = math.log10(states[state].emissions[emission]) + math.log10(states[state].dummy)
-		firstProbs[states[state].letter] = prob
-	print firstProbs
-	return firstProbs
+		# Using sum instead of product of probabilitites to keep numbers large		
+		prob = states[state].emissions[emission] + states[state].dummy
+		firstProbs[states[state].letter] = (prob, states[state].letter)
+	vit = Viterbi()
+	vit.probStates = firstProbs
+	return vit
 
-def calcSecondDay(viterbis, observes):
+def calcDay(viterbis, observes):
+	i = 0
 	for observation in observes:
-		print observation
+		vitNode = Viterbi()
+		for x2State in states:
+			maxProb = (-100000000.0, "")
+			viterbiStates = viterbis[i].probStates
+			for x1State in viterbiStates:
+				(vProb, lett) = viterbiStates[x1State]
+				prob = states[x2State].emissions[observation+x2State] + states[x2State].transitions[x2State+lett] + vProb
+				if (prob > maxProb[0]):
+					maxProb = (prob, lett)
+			vitNode.probStates[x2State] = maxProb
+		viterbis.append(vitNode)
+		i = i + 1
 
 
 if __name__ == "__main__":
@@ -128,8 +141,7 @@ if __name__ == "__main__":
 	obsStates = parseData2()
 	viterbiNodes = []
 	viterbiNodes.append(calcFirstDay(obsStates[0]))
-	#calcSecondDay(viterbiNodes,obsStates[1:])
-
+	calcDay(viterbiNodes, obsStates[1:])
 
 
 
