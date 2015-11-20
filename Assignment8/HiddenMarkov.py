@@ -77,6 +77,7 @@ def outputFunction1():
 	for state in states:
 		newState = "P(" + state + ") = "
 		f.write(newState + str(states[state].dummy) + "\n")
+	f.close
 	
 # Function to parse the second data set we will be using for our Viterbi calculations	
 def parseData2():
@@ -96,10 +97,11 @@ def calcFirstDay(observ):
 	for state in states:
 		emission = observ + states[state].letter
 		# Using sum instead of product of probabilitites to keep numbers large		
-		prob = states[state].emissions[emission] + states[state].dummy
+		prob = math.log10(states[state].emissions[emission]) + math.log10(states[state].dummy)
 		firstProbs[states[state].letter] = (prob, states[state].letter)
 	vit = Viterbi()
 	vit.probStates = firstProbs
+	print vit.probStates
 	return vit
 
 def calcDay(viterbis, observes):
@@ -107,16 +109,18 @@ def calcDay(viterbis, observes):
 	for observation in observes:
 		vitNode = Viterbi()
 		for x2State in states:
-			maxProb = (-100000000.0, "")
+			maxProb = (-pow(10, 20), "")
 			viterbiStates = viterbis[i].probStates
 			for x1State in viterbiStates:
 				(vProb, lett) = viterbiStates[x1State]
-				prob = states[x2State].emissions[observation+x2State] + states[x2State].transitions[x2State+lett] + vProb
+				prob = math.log10(states[x2State].emissions[observation+x2State]) + math.log10(states[x2State].transitions[x2State+x1State])*vProb
 				if (prob > maxProb[0]):
-					maxProb = (prob, lett)
+					maxProb = (prob, x1State)
 			vitNode.probStates[x2State] = maxProb
+			print observation, x2State, vitNode.probStates[x2State]
 		viterbis.append(vitNode)
 		i = i + 1
+		print i
 
 
 if __name__ == "__main__":
