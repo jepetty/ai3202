@@ -101,7 +101,6 @@ def calcFirstDay(observ):
 		firstProbs[states[state].letter] = (prob, states[state].letter)
 	vit = Viterbi()
 	vit.probStates = firstProbs
-	print vit.probStates
 	return vit
 
 def calcDay(viterbis, observes):
@@ -113,15 +112,33 @@ def calcDay(viterbis, observes):
 			viterbiStates = viterbis[i].probStates
 			for x1State in viterbiStates:
 				(vProb, lett) = viterbiStates[x1State]
-				prob = math.log10(states[x2State].emissions[observation+x2State]) + math.log10(states[x2State].transitions[x2State+x1State])*vProb
+				prob = math.log10(states[x2State].emissions[observation+x2State]) + math.log10(states[x2State].transitions[x2State+x1State]) + vProb
 				if (prob > maxProb[0]):
 					maxProb = (prob, x1State)
 			vitNode.probStates[x2State] = maxProb
-			print observation, x2State, vitNode.probStates[x2State]
 		viterbis.append(vitNode)
 		i = i + 1
-		print i
+	return viterbis
 
+# Function to create the path from the calculated viterbis
+def createPath(viterbis):
+	totalNodes = len(viterbis)
+	lastNode = viterbis[totalNodes-1]
+	path = ""
+	index = ""
+	maxValue = (-pow(10, 20), "")
+	for state in lastNode.probStates:
+		if lastNode.probStates[state][0] > maxValue[0]:
+			maxValue = lastNode.probStates[state]
+			index = state
+	path = index + path
+	backpointer = maxValue[1]
+	for i in range(0,totalNodes - 1):
+		node = viterbis[totalNodes - 2 - i]
+		(value, bp) = node.probStates[backpointer]
+		path = backpointer + path
+		backpointer = bp
+	return path
 
 if __name__ == "__main__":
 	# Create dictionaries to store number of states, probabilities, etc.
@@ -145,7 +162,8 @@ if __name__ == "__main__":
 	obsStates = parseData2()
 	viterbiNodes = []
 	viterbiNodes.append(calcFirstDay(obsStates[0]))
-	calcDay(viterbiNodes, obsStates[1:])
+	viterbiNodes = calcDay(viterbiNodes, obsStates[1:])
+	viterbiPath = createPath(viterbiNodes)
 
 
 
